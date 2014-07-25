@@ -34,7 +34,7 @@ function init() {
     mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
     
-    // STARTOF Joe Code
+
     
     jgeometry = new THREE.BoxGeometry(500, 500, 500);
     jmaterial = new THREE.MeshBasicMaterial({
@@ -47,8 +47,8 @@ function init() {
     jmesh.position.x = 700
     
     scene.add(jmesh);
+    
 
-    //*********************************
     ageometry = new THREE.BoxGeometry(500, 500, 500);
 
     amesh = new THREE.Mesh(ageometry, jmaterial);
@@ -57,11 +57,7 @@ function init() {
     amesh.position.z = 1000;
     
     scene.add(amesh);
-    //*********************************
-    
-    // ENDOF Joe Code
 
-    // STARTOF Bad Joe Code
 
     meshes = []
 
@@ -86,11 +82,6 @@ function init() {
 
     }
 
-    /*for(var i = 0; i < 1; i++){
-        console.log("Random number is " + Math.random());
-    }*/
-
-    // ENDOF Bad Joe Code
 
     renderer = new THREE.CanvasRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -110,44 +101,11 @@ function animate() {
     jmesh.rotation.y += 0.01;
 
 
-    var pitchPercent = 0;
-    var rollPercent = 0;
-
-    console.log("radToDeg(camera.rotation.y) % 90 is " + radToDeg(camera.rotation.y) % 90);
-
-    var camSideRot = radToDeg(camera.rotation.y);
-
-    var quarterPercent = (camSideRot % 90) / 90 * 100;
-
-
-    if(camSideRot >= 0 && camSideRot < 90){
-        pitchPercent = 100 - quarterPercent;
-        rollPercent = quarterPercent;
-    }
-    else if(camSideRot >= 90 && camSideRot < 180){
-        pitchPercent = quarterPercent;
-        rollPercent = 100 - quarterPercent;
-    }
-    else if(camSideRot >= 180 && camSideRot < 270){
-        pitchPercent = 100 - quarterPercent;
-        rollPercent = quarterPercent;
-    }
-    else if(camSideRot >= 270){
-        pitchPercent = quarterPercent;
-        rollPercent = 100 - quarterPercent;
-    }
-
     // pitch
     camera.rotation.x += degToRad(upRot);
     // yaw
     camera.rotation.y += degToRad(sideRot);
 
-    //console.log("rot x is " + radToDeg(camera.rotation.x));
-    //console.log("rot z is " + radToDeg(camera.rotation.z));
-
-    console.log("pitchPercent: " + pitchPercent + " rollPercent: " + rollPercent + " quarterPercent: " + quarterPercent + " camera.rotation.x: " + radToDeg(camera.rotation.x) + " camera.rotation.z: " + radToDeg(camera.rotation.z) + " camera.rotation.y: " + radToDeg(camera.rotation.y));
-
-    
 
     if(radToDeg(camera.rotation.y) + sideRot < 0){
         camera.rotation.y = degToRad(sideRot + 360);
@@ -159,7 +117,6 @@ function animate() {
 
     upRot = 0;
     sideRot = 0;
-
 
 
     renderer.render(scene, camera);
