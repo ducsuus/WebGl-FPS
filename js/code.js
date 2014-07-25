@@ -66,8 +66,8 @@ function addMouseHandler(canvas) {
 
 function rotateScene(deltaX, deltaY) {
     // using deg2Rad on delta* here limits your scope of up/down/let/right movement - could be handy
-    camera.rotation.y += deltaX/60;
-    camera.rotation.x += deltaY/60;
+    camera.rotation.y += deltaX/120;
+    camera.rotation.x += deltaY/120;
     //upRot = deltaX;
     //sideRot = deltaY;
 }
@@ -251,12 +251,11 @@ function calculateMovement(){
 
     // W
     if (keyStates[87] == true) {
-        console.log("calculateMovement found that key 87 was pressed");
-        zPos -= 10
+        zPos += 10
     }
     // S
     if (keyStates[83] == true) {
-        zPos += 10;
+        zPos -= 10;
     }
     // A
     if (keyStates[65] == true) {
