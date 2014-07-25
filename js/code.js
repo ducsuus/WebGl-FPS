@@ -4,6 +4,7 @@ var geometry, material, mesh;
 var upRot = 0;
 var sideRot = 0;
 
+
 var xPos = 0;
 var zPos = 0;
 var yPos = 0;
@@ -11,21 +12,77 @@ var yPos = 0;
 var keyStates = new Object();
 
 
+var mouseDown = false;
+var mouseX = 0;
+var mouseY = 0;
+
+
 init();
 animate();
 
+
+
+function onMouseMove(evt) {
+    if (!mouseDown) {
+       // Ignore this ...
+       // return;
+    }
+
+    evt.preventDefault();
+
+    var deltaX = evt.clientX - mouseX,
+            deltaY = evt.clientY - mouseY;
+    mouseX = evt.clientX;
+    mouseY = evt.clientY;
+    rotateScene(deltaX, deltaY);
+}
+
+function onMouseDown(evt) {
+    evt.preventDefault();
+
+    mouseDown = true;
+    mouseX = evt.clientX;
+    mouseY = evt.clientY;
+    // alert('x='+mouseX + ' y='+mouseY);
+}
+
+function onMouseUp(evt) {
+    evt.preventDefault();
+    mouseDown = false;
+
+}
+
+function addMouseHandler(canvas) {
+    canvas.addEventListener('mousemove', function(e) {
+        onMouseMove(e);
+    }, false);
+    canvas.addEventListener('mousedown', function(e) {
+        onMouseDown(e);
+    }, false);
+    canvas.addEventListener('mouseup', function(e) {
+        onMouseUp(e);
+    }, false);
+}
+
+function rotateScene(deltaX, deltaY) {
+    // using deg2Rad on delta* here limits your scope of up/down/let/right movement - could be handy
+    camera.rotation.y += deltaX/60;
+    camera.rotation.x += deltaY/60;
+    //upRot = deltaX;
+    //sideRot = deltaY;
+}
 /*
-** General Rendering
-*/
+ ** General Rendering
+ */
 
 function init() {
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 
     // Set the order in which the camera should rotate: Y rotation, then X rotation, then Z rotation
-    //camera.eulerOrder = "YXZ"; // I changed to .rotation.order!!
+    //camera.eulerOrder = "YXZ"; // It has been changed to .rotation.order!!
     camera.rotation.order = "YXZ";
-    
+
     camera.position.z = 1000;
 
     camera.rotation.y = 0;
@@ -40,9 +97,9 @@ function init() {
 
     mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
-    
 
-    
+
+
     jgeometry = new THREE.BoxGeometry(500, 500, 500);
     jmaterial = new THREE.MeshBasicMaterial({
         color: 0xff0000,
@@ -50,25 +107,25 @@ function init() {
     });
 
     jmesh = new THREE.Mesh(jgeometry, jmaterial);
-    
+
     jmesh.position.x = 700
-    
+
     scene.add(jmesh);
-    
+
 
     ageometry = new THREE.BoxGeometry(500, 500, 500);
 
     amesh = new THREE.Mesh(ageometry, jmaterial);
-    
+
     amesh.position.x = -1000;
     amesh.position.z = 1000;
-    
+
     scene.add(amesh);
 
 
     meshes = []
 
-    for(var i = 0; i < 50; i++){
+    for (var i = 0; i < 50; i++) {
 
         jgeometry = new THREE.BoxGeometry(i + 1 * 100, i + 1 * 50, i + 1 * 20);
         jmaterial = new THREE.MeshBasicMaterial({
@@ -77,18 +134,18 @@ function init() {
         });
 
         meshes.push(new THREE.Mesh(jgeometry, jmaterial));
-        
+
         meshes[i].position.x = Math.floor((Math.random() * window.innerWidth) + 1) - (window.innerWidth / 2);
         meshes[i].position.y = Math.floor((Math.random() * window.innerHeight) + 1) - (window.innerHeight / 2);
 
         meshes[i].rotation.x += Math.random();
         meshes[i].rotation.y += Math.random();
-        
+
         scene.add(meshes[i]);
 
 
     }
-
+    addMouseHandler(document);
 
     renderer = new THREE.CanvasRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -107,7 +164,7 @@ function animate() {
 
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.02;
-    
+
     jmesh.rotation.x += 0.02;
     jmesh.rotation.y += 0.01;
 
@@ -118,11 +175,11 @@ function animate() {
     camera.rotation.y += degToRad(sideRot);
 
 
-    if(radToDeg(camera.rotation.y) + sideRot < 0){
+    if (radToDeg(camera.rotation.y) + sideRot < 0) {
         camera.rotation.y = degToRad(sideRot + 360);
-    }else if(radToDeg(camera.rotation.y) + sideRot > 360){
+    } else if (radToDeg(camera.rotation.y) + sideRot > 360) {
         camera.rotation.y += degToRad(sideRot - 360);
-    }else{
+    } else {
         camera.rotation.y += degToRad(sideRot);
     }
 
@@ -144,22 +201,24 @@ function animate() {
 }
 
 /*
-** Unit Processing
-*/
+ ** Unit Processing
+ */
 
 // Converts from degrees to radians.
 function degToRad(degrees) {
-  return degrees * Math.PI / 180;
-};
- 
+    return degrees * Math.PI / 180;
+}
+;
+
 // Converts from radians to degrees.
 function radToDeg(radians) {
-  return radians * 180 / Math.PI;
-};
+    return radians * 180 / Math.PI;
+}
+;
 
 /*
-** Movement
-*/
+ ** Movement
+ */
 
 document.onkeydown = checkKeyDown;
 
