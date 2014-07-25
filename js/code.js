@@ -8,6 +8,18 @@ var mouseDown = false;
 var mouseX = 0;
 var mouseY = 0;
 
+var xPos = 0;
+var zPos = 0;
+var yPos = 0;
+
+var keyStates = new Object();
+
+
+var mouseDown = false;
+var mouseX = 0;
+var mouseY = 0;
+
+
 init();
 animate();
 
@@ -57,8 +69,8 @@ function addMouseHandler(canvas) {
 
 function rotateScene(deltaX, deltaY) {
     // using deg2Rad on delta* here limits your scope of up/down/let/right movement - could be handy
-    camera.rotation.y += deltaX/60;
-    camera.rotation.x += deltaY/60;
+    camera.rotation.y += deltaX/120;
+    camera.rotation.x += deltaY/120;
     //upRot = deltaX;
     //sideRot = deltaY;
 }
@@ -71,7 +83,8 @@ function init() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 
     // Set the order in which the camera should rotate: Y rotation, then X rotation, then Z rotation
-    camera.eulerOrder = "YXZ";
+    //camera.eulerOrder = "YXZ"; // It has been changed to .rotation.order!!
+    camera.rotation.order = "YXZ";
 
     camera.position.z = 1000;
 
@@ -148,6 +161,10 @@ function animate() {
 
     requestAnimationFrame(animate);
 
+    // Silly function name, basically checks to see what keys are pressed and then changes the xPos, yPos, zPos, ETC variables - this allows for multiple keys to be detected and removes the press, then delay, then spam press of a key
+    calculateMovement();
+
+
     mesh.rotation.x += 0.01;
     mesh.rotation.y += 0.02;
 
@@ -172,6 +189,15 @@ function animate() {
     upRot = 0;
     sideRot = 0;
 
+    console.log("Math.cos(camera.rotation.y) * xPos: " + Math.cos(camera.rotation.y) * xPos + " Math.sin(camera.rotation.y) * xPos: " + Math.sin(camera.rotation.y) * xPos);
+
+    camera.position.x += (Math.sin(camera.rotation.y) * zPos) + (Math.cos(camera.rotation.y) * xPos);
+    camera.position.y += degToRad(yPos);
+    camera.position.z += (Math.cos(camera.rotation.y) * zPos) - (Math.sin(camera.rotation.y) * xPos);
+
+    xPos = 0;
+    yPos = 0;
+    zPos = 0;
 
     renderer.render(scene, camera);
 
@@ -197,42 +223,66 @@ function radToDeg(radians) {
  ** Movement
  */
 
-document.onkeydown = checkKey;
+document.onkeydown = checkKeyDown;
 
-function checkKey(e) {
+function checkKeyDown(e) {
 
     e = e || window.event;
 
+    console.log("e is " + e.keyCode);
+
+    if(!isNaN(e.keyCode)){
+        console.log("Key down");
+        keyStates[parseInt(e.keyCode)] = true;
+    }
+}
+
+document.onkeyup = checkKeyUp;
+
+function checkKeyUp(e) {
+
+    e = e || window.event;
+
+    if(!isNaN(e.keyCode)){
+        keyStates[parseInt(e.keyCode)] = false;
+    }
+}
+    
+
+
+function calculateMovement(){
+
     // W
-    if (e.keyCode == '87') {
-        camera.position.z -= 10;
+    if (keyStates[87] == true) {
+        zPos += 10
     }
     // S
-    else if (e.keyCode == '83') {
-        camera.position.z += 10;
+    if (keyStates[83] == true) {
+        zPos -= 10;
     }
     // A
-    else if (e.keyCode == '65') {
-        camera.position.x -= 10;
+    if (keyStates[65] == true) {
+        xPos -= 10;
     }
     // D
-    else if (e.keyCode == '68') {
-        camera.position.x += 10;
+    if (keyStates[68] == true) {
+        xPos += 10;
     }
     // Up Arrow
-    else if (e.keyCode == '38') {
+    if (keyStates[38] == true) {
         upRot += 1;
     }
     // Down Arrow
-    else if (e.keyCode == '40') {
+    if (keyStates[40] == true) {
         upRot -= 1;
     }
     // Left Arrow
-    else if (e.keyCode == '37') {
+    if (keyStates[37] == true) {
         sideRot += 1;
     }
     // Right Arrow
-    else if (e.keyCode == '39') {
+    if (keyStates[39] == true) {
         sideRot -= 1;
     }
+
 }
