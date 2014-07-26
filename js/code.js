@@ -16,7 +16,6 @@ var yPos = 0;
 
 var keyStates = new Object();
 
-
 var mouseDown = false;
 var mouseX = 0;
 var mouseY = 0;
@@ -61,13 +60,22 @@ function changeCallback(e) {
             document.webkitPointerLockElement === document.body) {
         // Pointer was just locked
         // Enable the mousemove listener
-        // alert('Locked!');
         document.addEventListener('mousemove', function(e){ moveCallback(e);}, false);
+
+
+
+
     } else {
+        // NOTE: THIS DOESN'T WORK! - THIS ELSE SECTION IS NEVER CALLED!
+
         // Pointer was just unlocked
         // Disable the mousemove listener
-        document.removeEventListener("mousemove", moveCallback, false);
+        document.removeEventListener("mousemove", function(e){ moveCallback(e);}, false);
         this.unlockHook(this.element);
+
+
+
+
     }
 }
 
@@ -84,7 +92,9 @@ function moveCallback(e) {
 
     // alert('Mouse moved - x:' + movementX);
 
+
     rotateScene(movementX, movementY);
+    
 }
 
 
@@ -101,7 +111,7 @@ function onMouseMove(evt) {
             deltaY = evt.clientY - mouseY;
     mouseX = evt.clientX;
     mouseY = evt.clientY;
-    rotateScene(deltaX, deltaY);
+    //rotateScene(deltaX, deltaY);
 }
 
 function onMouseDown(evt) {
@@ -135,8 +145,8 @@ function addMouseHandler(canvas) {
 function rotateScene(deltaX, deltaY) {
     // using deg2Rad on delta* here limits your scope of up/down/let/right movement - could be handy
 
-    camera.rotation.y += deltaX / 120;
-    camera.rotation.x += deltaY / 120;
+    camera.rotation.y -= deltaX / 120;
+    camera.rotation.x -= deltaY / 120;
     //upRot = deltaX;
     //sideRot = deltaY;
 
@@ -254,19 +264,26 @@ function animate() {
     jmesh.rotation.y += 0.01;
 
 
+
     // pitch
     camera.rotation.x += degToRad(upRot);
     // yaw
     camera.rotation.y += degToRad(sideRot);
 
 
-    if (radToDeg(camera.rotation.y) + sideRot < 0) {
-        camera.rotation.y = degToRad(sideRot + 360);
-    } else if (radToDeg(camera.rotation.y) + sideRot > 360) {
-        camera.rotation.y += degToRad(sideRot - 360);
-    } else {
-        camera.rotation.y += degToRad(sideRot);
+    // Normalise the rotation of the camera so that we have no values negative or above 360
+    normaliseCameraRotation();
+
+    // Make sure the camera can't look up or down to far
+    if(radToDeg(camera.rotation.x) > 90 && radToDeg(camera.rotation.x) <= 180 ){
+        camera.rotation.x = degToRad(90);
     }
+    else if(radToDeg(camera.rotation.x) > 180 && radToDeg(camera.rotation.x) < 270 ){
+        camera.rotation.x = degToRad(270);
+    }
+
+    console.log("camera.rotation.x is " + radToDeg(camera.rotation.x));
+
 
     upRot = 0;
     sideRot = 0;
@@ -276,6 +293,7 @@ function animate() {
     camera.position.x += (Math.sin(camera.rotation.y) * zPos) + (Math.cos(camera.rotation.y) * xPos);
     camera.position.y += degToRad(yPos);
     camera.position.z += (Math.cos(camera.rotation.y) * zPos) - (Math.sin(camera.rotation.y) * xPos);
+
 
     xPos = 0;
     yPos = 0;
@@ -300,6 +318,29 @@ function radToDeg(radians) {
     return radians * 180 / Math.PI;
 }
 ;
+
+function normaliseCameraRotation(){
+    // y rotation (yaw)
+    if (radToDeg(camera.rotation.y) < 0) {
+        camera.rotation.y += degToRad(360);
+    } else if (radToDeg(camera.rotation.y) > 360) {
+        camera.rotation.y -= degToRad(360);
+    } 
+
+    // x rotation (pitch)
+    if (radToDeg(camera.rotation.x) < 0) {
+        camera.rotation.x += degToRad(360);
+    } else if (radToDeg(camera.rotation.x) > 360) {
+        camera.rotation.x -= degToRad(360);
+    } 
+
+    // z rotation (roll)
+    if (radToDeg(camera.rotation.z) < 0) {
+        camera.rotation.z += degToRad(360);
+    } else if (radToDeg(camera.rotation.z) > 360) {
+        camera.rotation.z -= degToRad(360);
+    } 
+}
 
 /*
  ** Input Detection
