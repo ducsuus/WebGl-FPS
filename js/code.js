@@ -21,20 +21,78 @@ var mouseDown = false;
 var mouseX = 0;
 var mouseY = 0;
 
-var element = document.body;
 
-element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-element.requestPointerLock();
+// alert('About to hook pointer lock change events');
+// Hook pointer lock state change events
+document.addEventListener('pointerlockchange', this.changeCallback, false);
+document.addEventListener('mozpointerlockchange', this.changeCallback, false);
+document.addEventListener('webkitpointerlockchange', this.changeCallback, false);
+
+document.body.addEventListener('click', function() {
+    setPointerLock();
+}, false);
+
 
 init();
 animate();
+// setPointerLock();
+
+
+// Lock mouse cursor to a "canvas" or other HTML element
+function setPointerLock(e) {
+
+    // 
+    // Set the HTML Body to be the scope of pointer locking
+    //alert('Let us try to lock the pointer the easy way ...');
+    element1 = document.body;
+    element1.requestPointerLock = element1.requestPointerLock ||
+            element1.mozRequestPointerLock ||
+            element1.webkitRequestPointerLock;
+    // Ask the browser to lock the pointer
+    element1.requestPointerLock();
+
+    // alert('Pointer is locked - allegedly!');
+}
+
+function changeCallback(e) {
+    // alert('In ChangeCallback');
+    if (document.pointerLockElement === document.body ||
+            document.mozPointerLockElement === document.body ||
+            document.webkitPointerLockElement === document.body) {
+        // Pointer was just locked
+        // Enable the mousemove listener
+        // alert('Locked!');
+        document.addEventListener('mousemove', function(e){ moveCallback(e);}, false);
+    } else {
+        // Pointer was just unlocked
+        // Disable the mousemove listener
+        document.removeEventListener("mousemove", moveCallback, false);
+        this.unlockHook(this.element);
+    }
+}
+
+function moveCallback(e) {
+    var movementX = e.movementX ||
+            e.mozMovementX ||
+            e.webkitMovementX ||
+            0;
+
+    var movementY = e.movementY ||
+            e.mozMovementY ||
+            e.webkitMovementY ||
+            0;
+
+    // alert('Mouse moved - x:' + movementX);
+
+    rotateScene(movementX, movementY);
+}
 
 
 
 function onMouseMove(evt) {
     if (!mouseDown) {
-       // Ignore this ...
-       // return;
+        // Ignore this ...
+        // return;
     }
 
     evt.preventDefault();
@@ -76,8 +134,11 @@ function addMouseHandler(canvas) {
 
 function rotateScene(deltaX, deltaY) {
     // using deg2Rad on delta* here limits your scope of up/down/let/right movement - could be handy
-    camera.rotation.y -= deltaX/120;
-    camera.rotation.x -= deltaY/120;
+
+    camera.rotation.y += deltaX / 120;
+    camera.rotation.x += deltaY / 120;
+    //upRot = deltaX;
+    //sideRot = deltaY;
 
 }
 /*
@@ -106,8 +167,6 @@ function init() {
 
     mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
-
-
 
     jgeometry = new THREE.BoxGeometry(500, 500, 500);
     jmaterial = new THREE.MeshBasicMaterial({
@@ -165,7 +224,7 @@ function init() {
 
 
     }
-    addMouseHandler(document);
+    // addMouseHandler(document);
 
     
 
@@ -254,7 +313,7 @@ function checkKeyDown(e) {
 
     console.log("e is " + e.keyCode);
 
-    if(!isNaN(e.keyCode)){
+    if (!isNaN(e.keyCode)) {
         console.log("Key down");
         keyStates[parseInt(e.keyCode)] = true;
     }
@@ -266,51 +325,15 @@ function checkKeyUp(e) {
 
     e = e || window.event;
 
-    if(!isNaN(e.keyCode)){
+    if (!isNaN(e.keyCode)) {
         keyStates[parseInt(e.keyCode)] = false;
     }
 }
 
-// When the user clicks, lock the mouse in place - lots of code to support multiple browsers as they all have different PointerLock APIs D:
-document.addEventListener( 'click', function ( event ) {
-
-                instructions.style.display = 'none';
-
-                // Ask the browser to lock the pointer
-                element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-
-                if ( /Firefox/i.test( navigator.userAgent ) ) {
-
-                    var fullscreenchange = function ( event ) {
-
-                        if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
-
-                            document.removeEventListener( 'fullscreenchange', fullscreenchange );
-                            document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
-
-                            element.requestPointerLock();
-                        }
-
-                    }
-
-                    document.addEventListener( 'fullscreenchange', fullscreenchange, false );
-                    document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
-
-                    element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
-
-                    element.requestFullscreen();
-
-                } else {
-
-                    element.requestPointerLock();
-
-                }
-
-            }, false );
-    
 
 
-function calculateMovement(){
+
+function calculateMovement() {
 
     // W
     if (keyStates[87] == true) {
