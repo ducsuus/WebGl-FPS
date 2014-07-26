@@ -1,4 +1,4 @@
-
+console.log("Starting!");
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -21,6 +21,10 @@ var mouseDown = false;
 var mouseX = 0;
 var mouseY = 0;
 
+var element = document.body;
+
+element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+element.requestPointerLock();
 
 init();
 animate();
@@ -67,14 +71,14 @@ function addMouseHandler(canvas) {
     canvas.addEventListener('mouseup', function(e) {
         onMouseUp(e);
     }, false);
+
 }
 
 function rotateScene(deltaX, deltaY) {
     // using deg2Rad on delta* here limits your scope of up/down/let/right movement - could be handy
     camera.rotation.y -= deltaX/120;
     camera.rotation.x -= deltaY/120;
-    //upRot = deltaX;
-    //sideRot = deltaY;
+
 }
 /*
  ** General Rendering
@@ -90,7 +94,7 @@ function init() {
 
     camera.position.z = 1000;
 
-    camera.rotation.y = 0;
+    camera.rotation.y = degToRad(0);
 
     scene = new THREE.Scene();
 
@@ -127,6 +131,17 @@ function init() {
 
     scene.add(amesh);
 
+    bgeometry = new THREE.BoxGeometry(500, 500, 500);
+
+    bmesh = new THREE.Mesh(bgeometry, jmaterial);
+
+    bmesh.position.x = 0;
+    bmesh.position.z = 2000;
+
+    bmesh.rotation.z = degToRad(30);
+
+    scene.add(bmesh);
+
 
     meshes = []
 
@@ -152,8 +167,14 @@ function init() {
     }
     addMouseHandler(document);
 
-    renderer = new THREE.CanvasRenderer();
+    
+
+
+    renderer = new THREE.WebGLRenderer({antialias:true});
+
+
     renderer.setSize(window.innerWidth, window.innerHeight);
+
 
     document.body.appendChild(renderer.domElement);
 
@@ -222,7 +243,7 @@ function radToDeg(radians) {
 ;
 
 /*
- ** Movement
+ ** Input Detection
  */
 
 document.onkeydown = checkKeyDown;
@@ -249,6 +270,43 @@ function checkKeyUp(e) {
         keyStates[parseInt(e.keyCode)] = false;
     }
 }
+
+// When the user clicks, lock the mouse in place - lots of code to support multiple browsers as they all have different PointerLock APIs D:
+document.addEventListener( 'click', function ( event ) {
+
+                instructions.style.display = 'none';
+
+                // Ask the browser to lock the pointer
+                element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+
+                if ( /Firefox/i.test( navigator.userAgent ) ) {
+
+                    var fullscreenchange = function ( event ) {
+
+                        if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
+
+                            document.removeEventListener( 'fullscreenchange', fullscreenchange );
+                            document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
+
+                            element.requestPointerLock();
+                        }
+
+                    }
+
+                    document.addEventListener( 'fullscreenchange', fullscreenchange, false );
+                    document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
+
+                    element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+
+                    element.requestFullscreen();
+
+                } else {
+
+                    element.requestPointerLock();
+
+                }
+
+            }, false );
     
 
 
